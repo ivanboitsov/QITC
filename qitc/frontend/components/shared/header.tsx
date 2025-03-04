@@ -2,6 +2,7 @@
 
 import { Button } from "../ui/button";
 import { UserRound  } from 'lucide-react';
+import PixelRectangleIcon from "./pixel-rectangle-icon";
 
 export default function Header() {
 
@@ -24,7 +25,7 @@ export default function Header() {
       {/* Логотип и ссылки */}
       <div className="flex items-center space-x-8">
         {/* Логотип */}
-        <div className="text-7xl font-bold tracking-wide uppercase">QITC</div>
+        <div className="text-6xl font-bold tracking-wide uppercase">QITC</div>
 
         {/* Ссылки для навигации */}
         <div className="flex space-x-6">
@@ -55,9 +56,12 @@ export default function Header() {
       {/* Кнопка пользователя */}
       <Button
         variant="default"
-        className="w-16 h-16 rounded-full bg-[#03C9A1] flex items-center justify-center shadow-lg">
-        <UserRound className="text-white" />
+        className="w-16 h-16 bg-[#03C9A1] flex items-center justify-center">
+          <PixelRectangleIcon>
+            <UserRound className="text-white" />
+          </PixelRectangleIcon>
       </Button>
+      
     </header>
   );
 }

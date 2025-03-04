@@ -2,8 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'Monocraft';
+  src: url('./fonts/Monocraft.ttf') format('truetype-collection');
+  font-weight: normal;
+  font-style: normal;
+}
+
 body {
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Monocraft', monospace;
 }
 
 .fixed-width-container {
@@ -18,7 +25,6 @@ div button[class*= righted-button] {
   align-items: start;
 }
 
-/* global.css или ваш файл стилей */
 .grid-background {
   background-image: 
     linear-gradient(to right, rgba(0, 0, 0, 0.2) 1px, transparent 1px), 

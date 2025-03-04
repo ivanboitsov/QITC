@@ -5,19 +5,22 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectContent, SelectItem } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 
+import PixelRectangle from "./pixel-rectangle";
+
 export default function RegistrationForm() {
     const [selectedCourse, setSelectedCourse] = React.useState("placeholder");
 
   return (
     <section id="registration-form">
     {/* Верхняя надпись */}
-    <h1 className="text-4xl text-center px-4 mb-8">
+    <h1 className="text-3xl text-center px-4 mb-8">
       Место, где начинается великая история будущих лидеров технологий
     </h1>
     <div className="flex w-full h-[900px] items-center justify-center border-t fixed-width-container">
       <div className="flex w-full h-full items-center max-w justify-between px-52 grid-background">
-        <div className="flex flex-col md:flex-row gap-6 p-12 bg-[#03C9A1] rounded-lg shadow-md">
-          <div className="flex-1 text-5xl text-white">
+        <PixelRectangle>
+        <div className="flex flex-col md:flex-row gap-6 p-12">
+          <div className="flex-1 text-4xl text-white">
             <p>
               Если у вас появилось желание записаться в кружок или остались вопросы — заполните заявку, и мы обязательно с вами свяжемся.
             </p>
@@ -25,7 +28,7 @@ export default function RegistrationForm() {
           <div className="flex-1">
             <form className="space-y-6">
               <div>
-                <Label htmlFor="fio" className="text-3xl">Имя</Label>
+                <Label htmlFor="fio" className="text-2xl">Имя</Label>
                 <Input 
                     id="fio" 
                     name="fio" 
@@ -35,7 +38,7 @@ export default function RegistrationForm() {
                 />
               </div>
               <div>
-                <Label htmlFor="phone" className="text-3xl">Телефон</Label>
+                <Label htmlFor="phone" className="text-2xl">Телефон</Label>
                 <Input
                   id="phone"
                   type="tel"
@@ -51,7 +54,7 @@ export default function RegistrationForm() {
                 />
               </div>
               <div>
-                <Label htmlFor="email" className="text-3xl">Почта</Label>
+                <Label htmlFor="email" className="text-2xl">Почта</Label>
                 <Input
                   id="email"
                   type="email"
@@ -62,7 +65,7 @@ export default function RegistrationForm() {
                 />
               </div>
               <div>
-                <Label htmlFor="course" className="text-3xl">Кружок</Label>
+                <Label htmlFor="course" className="text-2xl">Кружок</Label>
                 <Select
                     onValueChange={(value) => setSelectedCourse(value)}
                     value={selectedCourse}>
@@ -70,24 +73,25 @@ export default function RegistrationForm() {
                     {selectedCourse !== "placeholder" ? selectedCourse : "Выберите кружок"}
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="placeholder" className="text-2xl" disabled>
+                        <SelectItem value="placeholder" className="text-xl" disabled>
                             Выберите кружок
                         </SelectItem>
-                        <SelectItem value="Робототехника" className="text-2xl">Робототехника</SelectItem>
-                        <SelectItem value="Основы программирования" className="text-2xl">Основы программирования</SelectItem>
-                        <SelectItem value="Разработка игр" className="text-2xl">Разработка игр</SelectItem>
-                        <SelectItem value="Динамическое программирование" className="text-2xl">Динамическое программирование</SelectItem>
-                        <SelectItem value="Web-разработка" className="text-2xl">Web-разработка</SelectItem>
-                        <SelectItem value="Проектирование систем" className="text-2xl">Проектирование систем</SelectItem>
+                        <SelectItem value="Робототехника" className="text-xl">Робототехника</SelectItem>
+                        <SelectItem value="Основы программирования" className="text-xl">Основы программирования</SelectItem>
+                        <SelectItem value="Разработка игр" className="text-xl">Разработка игр</SelectItem>
+                        <SelectItem value="Динамическое программирование" className="text-xl">Динамическое программирование</SelectItem>
+                        <SelectItem value="Web-разработка" className="text-xl">Web-разработка</SelectItem>
+                        <SelectItem value="Проектирование систем" className="text-xl">Проектирование систем</SelectItem>
                     </SelectContent>
                 </Select>
                 </div>
-              <Button type="submit" className="w-full bg-black text-3xl h-12">
+              <Button type="submit" className="w-full bg-black text-2xl h-12">
                 Отправить
               </Button>
             </form>
           </div>
         </div>
+        </PixelRectangle>
       </div>
     </div>
     </section>
