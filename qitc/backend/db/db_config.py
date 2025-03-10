@@ -10,14 +10,12 @@ engine = create_async_engine(SQLALCHEMY_DATABASE_URL, echo=True)
 
 Base = declarative_base()
 
-# Создаём асинхронную сессию
 AsyncSessionLocal = sessionmaker(
     bind=engine,
     class_=AsyncSession,
     expire_on_commit=False,
 )
 
-# Функция для получения асинхронной сессии
 async def get_db():
     async with AsyncSessionLocal() as db:
         try:

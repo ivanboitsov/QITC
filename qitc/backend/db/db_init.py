@@ -1,23 +1,15 @@
 import logging
-
-from db_config import SessionLocal, Base, engine
-
-from src.course.course_models import Course
-from src.task.task_models import Task
+from sqlalchemy.ext.asyncio import AsyncSession
+from db.db_config import Base, engine
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def db_init():
-    db = SessionLocal()
-
+async def db_init():
     try:
-        Base.metadata.create_all(bind=engine, tables = [Course.__table__,
-                                                        Task.__table__])
-        db.commit()
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
         logger.info("(Init database) Database initialized successfully")
     except Exception as e:
-        db.rollback()
-        logger.fatal(f"(Init database) Initializing database: {e} ")
-    finally:
-        db.close()
+        logger.fatal(f"(Init database) Error: {e}")
+        raise

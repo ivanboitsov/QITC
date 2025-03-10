@@ -15,6 +15,8 @@ DB_NAME = os.environ.get("DB_NAME")
 DB_USER = os.environ.get("DB_USER")
 DB_PASS = os.environ.get("DB_PASS")
 
+assert all([DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS]), "Database configuration is incomplete"
+
 MIN_PASSWORD_LENGTH = os.environ.get("MIN_PASSWORD_LENGTH")
 
 ACCESS_TOKEN_EXPIRE_MINUTES = os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES")
