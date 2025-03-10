@@ -135,7 +135,7 @@ async def get_not_deleted_courses(
 
 
 @course_router.get(
-    "/with-tasks",
+    "/tasks",
     tags=["Course"],
     response_model=List[CourseWithTasksSchema],
     responses={
@@ -281,7 +281,7 @@ async def update_course(
 Добавить проверку на авторизацию и права администратора 
 """
 @course_router.put(
-    "/{course_id}/soft-delete",
+    "/{course_id}/delete",
     tags=["Course"],
     response_model=MessageSchema,
     responses={
