@@ -118,7 +118,7 @@ async def get_courses(
 )
 async def get_not_deleted_courses(
     skip: int = 0, 
-    limit: int = 25,
+    limit: int = 10,
     db: AsyncSession = Depends(get_db),
     course_service: CourseService = Depends(CourseService)
     ) -> List[CourseSchema]:
@@ -151,7 +151,7 @@ async def get_not_deleted_courses(
 )
 async def get_courses_with_tasks(
     skip: int = 0,
-    limit: int = 25,
+    limit: int = 5,
     db: AsyncSession = Depends(get_db),
     course_service: CourseService = Depends(CourseService)
     ) -> List[CourseWithTasksSchema]:
@@ -328,9 +328,9 @@ async def soft_delete_course(
 """
 Добавить проверку на авторизацию и права администратора 
 """
-'''
+
 @course_router.delete(
-    "/{course_id}",
+    "/{course_id}/delete",
     tags=["Course"],
     response_model=MessageSchema,
     responses={
@@ -369,4 +369,3 @@ async def hard_delete_course(
     except Exception as e:
         logger.error(f"(Delete course) Error: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
-'''

@@ -339,3 +339,47 @@ async def soft_delete_task(
     except Exception as e:
         logger.error(f"(Delete status task) Error: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
+    
+"""
+Добавить проверку на авторизацию и права администратора 
+"""
+@task_router.delete(
+    "/{task_id}/delete",
+    tags=["Task"],
+    response_model=MessageSchema,
+    responses={
+        200: {
+            "model": MessageSchema,
+            "description": "Task deleted successfully"
+        },
+        404: {
+            "model": ErrorSchema,
+            "description": "Task not found"
+        },
+        500: {
+            "model": ErrorSchema,
+            "description": "Internal server error"
+        }
+    }
+)
+async def hard_delete_task(
+    task_id: int,
+    db: AsyncSession = Depends(get_db),
+    task_service: TaskService = Depends(TaskService)
+    ) -> MessageSchema:
+    try:
+        deleted_task = await task_service.delete_task(db, task_id)
+
+        if not deleted_task:
+            raise HTTPException(status_code=404, detail=f"(Delete task) Task with ID {task_id} not found")
+
+        return MessageSchema(
+            messageDigest=str(task_id),
+            description=f"(Delete task) Task with ID {task_id} deleted successfully"
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"(Delete task) Error: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")

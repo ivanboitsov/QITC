@@ -54,7 +54,7 @@ class CourseService:
             self.logger.error(traceback.format_exc())
             raise
     
-    async def get_not_deleted_courses(self, db: AsyncSession, skip: int = 0, limit: int = 25) -> List[Course]:
+    async def get_not_deleted_courses(self, db: AsyncSession, skip: int = 0, limit: int = 10) -> List[Course]:
         try:
             courses = (
                 await db.execute(
@@ -73,7 +73,7 @@ class CourseService:
             raise
 
     # Функция для получения полного списка курсов с его задачами
-    async def get_courses_with_tasks(self, db: AsyncSession, skip: int = 0, limit: int = 25) -> List[Course]:
+    async def get_courses_with_tasks(self, db: AsyncSession, skip: int = 0, limit: int = 5) -> List[Course]:
         try:
             courses = (
                 await db.execute(
