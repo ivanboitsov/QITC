@@ -5,7 +5,7 @@ import PixelRectangle from "./pixel-rectangle";
 export default function QITCSection() {
   return (
     <section id="qiut-section">
-    <div className="flex flex-col w-full h-[1120px] items-center justify-center fixed-width-container">
+    <div className="flex flex-col w-full h-[1120px] items-center justify-center">
 
         {/* Центральный контейнер с тремя блоками */}
         <div className="flex w-full h-full max-w justify-between px-8 grid-background mt-20">
