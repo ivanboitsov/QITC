@@ -1,7 +1,7 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono, Pixelify_Sans } from "next/font/google";
-import localFont from "next/font/local"; // Импорт кастомного шрифта
 import "./globals.css";
+import type { Metadata } from "next";
+import localFont from "next/font/local";
+import { Geist, Geist_Mono, Pixelify_Sans } from "next/font/google";
 
 const geistPixelifySans = Pixelify_Sans({
   subsets: ['cyrillic', 'latin'],
