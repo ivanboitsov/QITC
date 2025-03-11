@@ -4,6 +4,7 @@ import asyncio
 
 from fastapi import FastAPI, APIRouter
 from contextlib import asynccontextmanager
+from fastapi.middleware.cors import CORSMiddleware
 
 from db.db_init import db_init
 
@@ -21,6 +22,15 @@ router.include_router(course_router)
 router.include_router(task_router)
 
 app = FastAPI()
+
+# Настройка CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(router)
 
