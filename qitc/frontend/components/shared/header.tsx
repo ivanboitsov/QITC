@@ -56,10 +56,8 @@ export default function Header() {
       {/* Кнопка пользователя */}
       <Button
         variant="default"
-        className="w-16 h-16 bg-[#03C9A1] flex items-center justify-center">
-          <PixelRectangleIcon>
-            <UserRound className="text-white" />
-          </PixelRectangleIcon>
+        className="w-16 h-16 bg-[#03C9A1] flex items-center justify-center rounded-2xl">
+          <UserRound className="text-white" />
       </Button>
       
     </header>
