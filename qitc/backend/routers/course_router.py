@@ -116,20 +116,20 @@ async def get_courses(
             }
     }
 )
-async def get_not_deleted_courses(
+async def get_active_courses(
     skip: int = 0, 
     limit: int = 10,
     db: AsyncSession = Depends(get_db),
     course_service: CourseService = Depends(CourseService)
     ) -> List[CourseSchema]:
     try:
-        courses = await course_service.get_not_deleted_courses(db, skip=skip, limit=limit)
+        courses = await course_service.get_active_courses(db, skip=skip, limit=limit)
 
-        logger.info(f"(Get not deleted courses) Successfully retrieved {len(courses)} courses")
+        logger.info(f"(Get active courses) Successfully retrieved {len(courses)} courses")
         return courses
     
     except Exception as e:
-        logger.error(f"(Get not deleted courses) Error: {e}", exc_info=True)
+        logger.error(f"(Get active courses) Error: {e}", exc_info=True)
         logger.error(traceback.format_exc())
         raise HTTPException(status_code=500, detail="Internal server error")
 

@@ -54,12 +54,12 @@ class CourseService:
             self.logger.error(traceback.format_exc())
             raise
     
-    async def get_not_deleted_courses(self, db: AsyncSession, skip: int = 0, limit: int = 10) -> List[Course]:
+    async def get_active_courses(self, db: AsyncSession, skip: int = 0, limit: int = 10) -> List[Course]:
         try:
             courses = (
                 await db.execute(
                     select(Course)
-                    .where(Course.status != "deleted")
+                    .where(Course.status != "deleted" and Course.status != "closed")
                     .offset(skip)
                     .limit(limit)
                     )
