@@ -1,39 +1,65 @@
-import PixelRectangle from "./pixel-rectangle";
+'use client';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 
-export default function Courses() {
-  // Массив курсов с данными
-  const courses = [
-    { title: "Курс 1", description: "Краткое описание курса 1" },
-    { title: "Курс 2", description: "Краткое описание курса 2" },
-    { title: "Курс 3", description: "Краткое описание курса 3" },
-    { title: "Курс 4", description: "Краткое описание курса 4" },
-    { title: "Курс 5", description: "Краткое описание курса 5" },
-    { title: "Курс 6", description: "Краткое описание курса 6" },
-  ];
+interface Course {
+  id: number;
+  name: string;
+  description: string;
+  students_count: number;
+  status: string;
+}
+
+const Courses = () => {
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const response = await axios.get<Course[]>('/api/v1/qitc/course/active?skip=0&limit=10');
+        setCourses(response.data);
+        setError(null);
+      } 
+      catch (error) {
+        setError('Ошибка при загрузке курсов');
+        console.error(error);
+      } 
+      finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCourses();
+  }, []);
+
+  if (loading) {
+    return <div>Загрузка...</div>;
+  }
+
+  if (error) {
+    return <div>Ошибка: {error}</div>;
+  }
 
   return (
     <section id="courses">
-      <div className="w-full border-t p-8 fixed-width-container">
-        {/* Заголовок */}
-        <div className="text-center mb-8">
-          <h2 className="text-3xl">
-            Познакомьте своего ребенка с востребованными на рынке навыками уже сейчас
-          </h2>
-        </div>
+      <div className="courses-container">
+        <h2 className="text-3xl mb-5 mt-5 text-center">Познакомьте ребенка с профессиями будущего уже сейчас</h2>
 
-        {/* Сетка 3x2, которая занимает всё оставшееся пространство */}
-        <div className="flex-1 grid grid-cols-3 gap-4">
-          {courses.map((course, index) => (
-            // Обертка для растягивания плитки на всю ячейку сетки и центрирования
-            <div key={index} className="w-full h-full flex items-center justify-center">
-              <PixelRectangle className="w-540 h-540 flex-col justify-center p-4 inline-block">
-                <p className="text-2xl text-center">{course.title}</p>
-                <p className="mt-2 text-sm text-center">{course.description}</p>
-              </PixelRectangle>
+        <div className="grid grid-cols-3 gap-5">
+          {courses.map((course) => (
+            <div key={course.id} className="cassette-wrapper">
+              <div className="cassette-container">
+                <img src="audio.png" alt="Cassette" className="cassette-image" />
+                <div className="course-name">{course.name}</div>
+              </div>
             </div>
           ))}
         </div>
       </div>
     </section>
   );
-}
+};
+
+export default Courses;

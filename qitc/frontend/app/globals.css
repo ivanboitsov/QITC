@@ -14,8 +14,8 @@ body {
 }
 
 .fixed-width-container {
-  width: 1800px; /* Фиксированная ширина в пикселях */
-  margin: 0 auto; /* Центрирование по горизонтали */
+  width: 1800px;
+  margin: 0 auto;
 }
 
 div button[class*= righted-button] {
@@ -31,6 +31,48 @@ div button[class*= righted-button] {
     linear-gradient(to bottom, rgba(0, 0, 0, 0.2) 1px, transparent 1px);
   background-size: 50px 50px;
   animation: moveGrid 3s linear infinite;
+}
+
+.cassette-wrapper {
+  padding: 20px; 
+  display: flex;
+  justify-content: right;
+  align-items: flex-end;
+}
+
+.cassette-container {
+  position: relative;
+  width: 512px; 
+  height: 512px;
+  display: flex;
+  align-items: flex-end;
+  transform: rotate(-8deg);
+  transition: transform 0.4s ease;
+  transform-origin: bottom left;
+}
+
+.cassette-container:hover {
+  transform: rotate(-18deg);
+}
+
+.cassette-image {
+  width: 100%;
+  height: 70%;
+  object-fit: cover;
+}
+/* Текст на кассете */
+.course-name {
+  position: absolute;
+  top: 44%;
+  left: 0;
+  right: 0;
+  padding: 0 70px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 @layer base {
