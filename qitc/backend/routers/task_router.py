@@ -5,7 +5,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, Depends, HTTPException
 
 from db.db_config import get_db
+from config import oauth2_scheme
 
+from services.auth_service import AuthService
 from services.task_service import TaskService
 from models.schemas.error_schemas import ErrorSchema
 from models.schemas.message_schemas import MessageSchema 
@@ -16,9 +18,7 @@ logger = logging.getLogger(__name__)
 
 task_router = APIRouter(prefix="/task")
 
-"""
-Добавить проверку на авторизацию и права администратора 
-"""
+
 @task_router.post(
     "",
     tags=["Task"],
@@ -32,6 +32,14 @@ task_router = APIRouter(prefix="/task")
             "model": ErrorSchema,
             "description": "Invalid input data"
         },
+        401:{
+            "model": ErrorSchema,
+            "description": "Unauthorized"
+        },
+        403:{
+            "model": ErrorSchema,
+            "description": "Bad token"
+        },
         500: {
             "model": ErrorSchema,
             "description": "Internal server error"
@@ -41,19 +49,31 @@ task_router = APIRouter(prefix="/task")
 async def create_task(
             task_data: TaskCreateSchema,
             db: AsyncSession = Depends(get_db),
-            task_service: TaskService = Depends(TaskService)
+            access_token: str = Depends(oauth2_scheme),
+            task_service: TaskService = Depends(TaskService),
+            auth_service: AuthService = Depends(AuthService)
     ) -> MessageSchema:
     try:
+        if await auth_service.check_revoked(db, access_token):
+            logger.warning(f"(Create task) Token is revoked: {access_token}")
+            raise HTTPException(status_code=403, detail="Token revoked")
+        
+        token_data = await auth_service.get_data_from_access_token(access_token)
+        role = token_data["role"]
+
+        if role != "admin":
+            logger.warning(f"(Create task) Bad token: {access_token}")
+            raise HTTPException(status_code=403, detail="Not allowed")
 
         task = await task_service.create_task(
             db = db, 
             name=task_data.name,
             description=task_data.description,
-            course_id=task_data.course_id,
+            course_id=task_data.course_id
         )
 
         if not task:
-            logger.info(f"(Create task) Course with ID {task_data.course_id} not found")
+            logger.warning(f"(Create task) Course with ID {task_data.course_id} not found")
             raise HTTPException(status_code=400, detail="Invalid input data")
 
         logger.info(f"(Create task) Task successfully created: {task.id}")
@@ -72,9 +92,6 @@ async def create_task(
         logger.error(f"(Create task) Error: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
-"""
-Добавить проверку на авторизацию и права студента или учителя
-"""
 @task_router.get(
     "",
     tags=["Task"],
@@ -82,6 +99,14 @@ async def create_task(
     responses={
         200: {
             "model": List[TaskSchema]
+        },
+        401:{
+            "model": ErrorSchema,
+            "description": "Unauthorized"
+        },
+        403:{
+            "model": ErrorSchema,
+            "description": "Bad token"
         },
         500: {
             "model": ErrorSchema, 
@@ -93,11 +118,24 @@ async def get_tasks(
     skip: int = 0, 
     limit: int = 50,
     db: AsyncSession = Depends(get_db),
+    access_token: str = Depends(oauth2_scheme),
+    auth_service: AuthService = Depends(AuthService),
     task_service: TaskService = Depends(TaskService)
     ) -> List[TaskSchema]:
     try:
-        tasks = await task_service.get_tasks(db, skip=skip, limit=limit)
 
+        if await auth_service.check_revoked(db, access_token):
+            logger.warning(f"(Get tasks) Token is revoked: {access_token}")
+            raise HTTPException(status_code=403, detail="Token revoked")
+        
+        token_data = await auth_service.get_data_from_access_token(access_token)
+        role = token_data["role"]
+
+        if role != "admin" or role != "student":
+            logger.warning(f"(Get tasks) Bad token: {access_token}")
+            raise HTTPException(status_code=403, detail="Not allowed")
+
+        tasks = await task_service.get_tasks(db, skip=skip, limit=limit)
         logger.info(f"(Get tasks) Successfully retrieved {len(tasks)} task")
         return tasks
     
@@ -107,9 +145,7 @@ async def get_tasks(
             status_code=500,
             detail="Internal server error"
         )   
-"""
-Добавить проверку на авторизацию и права студента или учителя
-"""
+
 @task_router.get(
     "/{task_id}",
     tags=["Task"],
@@ -117,27 +153,47 @@ async def get_tasks(
     responses={
         200: {
             "model": TaskSchema
-            },
+        },
+        401:{
+            "model": ErrorSchema,
+            "description": "Unauthorized"
+        },
+        403:{
+            "model": ErrorSchema,
+            "description": "Bad token"
+        },
         404: {
             "model": ErrorSchema, 
             "description": "Task not found"
-            },
+        },
         500: {
             "model": ErrorSchema, 
             "description": "Internal server error"
-            }
+        }
     }
 )
 async def get_task(
     task_id: int,
     db: AsyncSession = Depends(get_db),
+    access_token: str = Depends(oauth2_scheme),
+    auth_service: AuthService = Depends(AuthService),
     task_service: TaskService = Depends(TaskService)
     ) -> TaskSchema:
     try:
+        if await auth_service.check_revoked(db, access_token):
+            logger.warning(f"(Get task by ID) Token is revoked: {access_token}")
+            raise HTTPException(status_code=403, detail="Token revoked")
+        
+        token_data = await auth_service.get_data_from_access_token(access_token)
+        role = token_data["role"]
+
+        if role != "admin" or role != "student":
+            logger.warning(f"(Get task by ID) Bad token: {access_token}")
+            raise HTTPException(status_code=403, detail="Not allowed")
         task = await task_service.get_task_by_id(db, task_id)
 
         if not task:
-            logger.info(f"(Get task by ID) Task not found: {task_id}")
+            logger.warning(f"(Get task by ID) Task not found: {task_id}")
             raise HTTPException(status_code=404, detail="Task not found")
 
         logger.info(f"(Get task by ID) Task successfully found: {task.id}")
@@ -153,9 +209,6 @@ async def get_task(
             detail="Internal server error"
         )
 
-"""
-Добавить проверку на авторизацию и права администратора 
-"""
 @task_router.put(
     "/{task_id}",
     tags=["Task"],
@@ -168,6 +221,14 @@ async def get_task(
         400: {
             "model": ErrorSchema,
             "description": "Invalid input data"
+        },
+        401:{
+            "model": ErrorSchema,
+            "description": "Unauthorized"
+        },
+        403:{
+            "model": ErrorSchema,
+            "description": "Bad token"
         },
         404: {
             "model": ErrorSchema,
@@ -183,9 +244,22 @@ async def update_task(
     task_id: int,
     task_data: TaskUpdateSchema,
     db: AsyncSession = Depends(get_db),
+    access_token: str = Depends(oauth2_scheme),
+    auth_service: AuthService = Depends(AuthService),
     task_service: TaskService = Depends(TaskService)
     ) -> MessageSchema:
     try:
+        if await auth_service.check_revoked(db, access_token):
+            logger.warning(f"(Update task) Token is revoked: {access_token}")
+            raise HTTPException(status_code=403, detail="Token revoked")
+        
+        token_data = await auth_service.get_data_from_access_token(access_token)
+        role = token_data["role"]
+
+        if role != "admin":
+            logger.warning(f"(Update task) Bad token: {access_token}")
+            raise HTTPException(status_code=403, detail="Not allowed")
+        
         updated_task = await task_service.update_task(
             db = db,
             task_id=task_id,
@@ -202,7 +276,7 @@ async def update_task(
             )
 
         # Кастомизировать ошибку с INVALID INPUT DATA
-        if updated_task == "no_changes":
+        if updated_task == None:
             return MessageSchema(
                 messageDigest=str(task_id),
                 description="(Update task) No changes provided for the task"
@@ -222,9 +296,6 @@ async def update_task(
         logger.error(f"(Update task) Error: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
-"""
-Добавить проверку на авторизацию и права студента или учителя 
-"""
 @task_router.put(
     "/{task_id}/status",
     tags=["Task"],
@@ -237,6 +308,14 @@ async def update_task(
         400: {
             "model": ErrorSchema,
             "description": "Invalid input data"
+        },
+        401:{
+            "model": ErrorSchema,
+            "description": "Unauthorized"
+        },
+        403:{
+            "model": ErrorSchema,
+            "description": "Bad token"
         },
         404: {
             "model": ErrorSchema,
@@ -252,12 +331,24 @@ async def update_status_task(
     task_id: int,
     task_status: str,
     db: AsyncSession = Depends(get_db),
+    access_token: str = Depends(oauth2_scheme),
+    auth_service: AuthService = Depends(AuthService),
     task_service: TaskService = Depends(TaskService)
     ) -> MessageSchema:
     try:
+        if await auth_service.check_revoked(db, access_token):
+            logger.warning(f"(Update status task) Token is revoked: {access_token}")
+            raise HTTPException(status_code=403, detail="Token revoked")
+        
+        token_data = await auth_service.get_data_from_access_token(access_token)
+        role = token_data["role"]
+
+        if role != "admin" or role != "student":
+            logger.warning(f"(Update status task) Bad token: {access_token}")
+            raise HTTPException(status_code=403, detail="Not allowed")
         
         if task_status not in TaskStatus:
-            logger.info(f"(Update status task) Status {task_status} doesnt exist")
+            logger.warning(f"(Update status task) Status {task_status} doesnt exist")
             raise HTTPException(status_code=400, detail=f"Task status '{task_status}' not exsist")
 
         update_status_task = await task_service.update_task_status(
@@ -273,7 +364,7 @@ async def update_status_task(
             )
         
         # Кастомизировать ошибку с INVALID INPUT DATA
-        if update_status_task == "no_changes":
+        if update_status_task == None:
             raise MessageSchema(
                 messageDigest=str(task_id),
                 description="(Update status task) No changes provided for the task"
@@ -292,9 +383,6 @@ async def update_status_task(
         logger.error(f"(Update status task) Error: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
-"""
-Добавить проверку на авторизацию и права администратора 
-"""
 @task_router.put(
     "/{task_id}/delete",
     tags=["Task"],
@@ -303,6 +391,14 @@ async def update_status_task(
         200: {
             "model": MessageSchema,
             "description": "Task marked as deleted"
+        },
+        401:{
+            "model": ErrorSchema,
+            "description": "Unauthorized"
+        },
+        403:{
+            "model": ErrorSchema,
+            "description": "Bad token"
         },
         404: {
             "model": ErrorSchema,
@@ -317,16 +413,29 @@ async def update_status_task(
 async def soft_delete_task(
         task_id: int,
         db: AsyncSession = Depends(get_db),
+        access_token: str = Depends(oauth2_scheme),
+        auth_service: AuthService = Depends(AuthService),
         task_service: TaskService = Depends(TaskService)
     ) -> MessageSchema:
     try:
+        if await auth_service.check_revoked(db, access_token):
+            logger.warning(f"(Delete status task) Token is revoked: {access_token}")
+            raise HTTPException(status_code=403, detail="Token revoked")
+        
+        token_data = await auth_service.get_data_from_access_token(access_token)
+        role = token_data["role"]
+
+        if role != "admin":
+            logger.warning(f"(Delete status task) Bad token: {access_token}")
+            raise HTTPException(status_code=403, detail="Not allowed")
+        
         deleted_task = await task_service.delete_status_task(db, task_id)
 
         if not deleted_task:
             raise HTTPException(status_code=404,detail=f"(Delete status task) Task with ID {task_id} not found")
         
         
-        if deleted_task == "already_deleted":
+        if deleted_task == None:
             return MessageSchema(messageDigest=str(task_id), description=f"(Delete status task) Task with ID {task_id} was already marked as deleted")
         
         return MessageSchema(
@@ -339,10 +448,7 @@ async def soft_delete_task(
     except Exception as e:
         logger.error(f"(Delete status task) Error: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
-    
-"""
-Добавить проверку на авторизацию и права администратора 
-"""
+
 @task_router.delete(
     "/{task_id}/delete",
     tags=["Task"],
@@ -351,6 +457,14 @@ async def soft_delete_task(
         200: {
             "model": MessageSchema,
             "description": "Task deleted successfully"
+        },
+        401:{
+            "model": ErrorSchema,
+            "description": "Unauthorized"
+        },
+        403:{
+            "model": ErrorSchema,
+            "description": "Bad token"
         },
         404: {
             "model": ErrorSchema,
@@ -365,9 +479,22 @@ async def soft_delete_task(
 async def hard_delete_task(
     task_id: int,
     db: AsyncSession = Depends(get_db),
+    access_token: str = Depends(oauth2_scheme),
+    auth_service: AuthService = Depends(AuthService),
     task_service: TaskService = Depends(TaskService)
     ) -> MessageSchema:
     try:
+        if await auth_service.check_revoked(db, access_token):
+            logger.warning(f"(Delete task) Token is revoked: {access_token}")
+            raise HTTPException(status_code=403, detail="Token revoked")
+        
+        token_data = await auth_service.get_data_from_access_token(access_token)
+        role = token_data["role"]
+
+        if role != "admin":
+            logger.warning(f"(Delete task) Bad token: {access_token}")
+            raise HTTPException(status_code=403, detail="Not allowed")
+        
         deleted_task = await task_service.delete_task(db, task_id)
 
         if not deleted_task:

@@ -1,5 +1,4 @@
 import traceback
-import uuid
 import logging
 
 from typing import List
