@@ -6,7 +6,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, Depends, HTTPException
 
 from db.db_config import get_db
+from config import oauth2_scheme
 
+from services.auth_service import AuthService
 from services.course_service import CourseService
 from models.schemas.error_schemas import ErrorSchema
 from models.schemas.message_schemas import MessageSchema 
@@ -17,9 +19,7 @@ logger = logging.getLogger(__name__)
 
 course_router = APIRouter(prefix="/course")
 
-"""
-Добавить проверку на авторизацию и права администратора 
-"""
+
 @course_router.post(
     "",
     tags=["Course"],
@@ -33,6 +33,14 @@ course_router = APIRouter(prefix="/course")
             "model": ErrorSchema,
             "description": "Invalid input data"
         },
+        401:{
+            "model": ErrorSchema,
+            "description": "Unauthorized"
+        },
+        403:{
+            "model": ErrorSchema,
+            "description": "Bad token"
+        },
         500: {
             "model": ErrorSchema,
             "description": "Internal server error"
@@ -42,10 +50,22 @@ course_router = APIRouter(prefix="/course")
 async def create_course(
     course_data: CourseCreateSchema,
     db: AsyncSession = Depends(get_db),
+    access_token: str = Depends(oauth2_scheme),
+    auth_service: AuthService = Depends(AuthService),
     course_service: CourseService = Depends(CourseService)
     ) -> MessageSchema:
     try:
+        if await auth_service.check_revoked(db, access_token):
+            logger.warning(f"(Create course) Token is revoked: {access_token}")
+            raise HTTPException(status_code=403, detail="Token revoked")
+        
+        token_data = await auth_service.get_data_from_access_token(access_token)
+        role = token_data["role"]
 
+        if role != "admin":
+            logger.warning(f"(Create course) Bad token: {access_token}")
+            raise HTTPException(status_code=403, detail="Not allowed")
+        
         course = await course_service.create_course(
             db = db, 
             name=course_data.name,
@@ -70,7 +90,6 @@ async def create_course(
         logger.error(traceback.format_exc()) 
         raise HTTPException(status_code=500, detail="Internal server error")
 
-
 @course_router.get(
     "",
     tags=["Course"],
@@ -78,20 +97,40 @@ async def create_course(
     responses={
         200: {
             "model": List[CourseSchema]
-            },
+        },
+        401:{
+            "model": ErrorSchema,
+            "description": "Unauthorized"
+        },
+        403:{
+            "model": ErrorSchema,
+            "description": "Bad token"
+        },
         500: {
             "model": ErrorSchema, 
             "description": "Internal server error"
-            }
+        }
     }
 )
 async def get_courses(
     skip: int = 0, 
     limit: int = 25,
+    access_token: str = Depends(oauth2_scheme),
+    auth_service: AuthService = Depends(AuthService),
     db: AsyncSession = Depends(get_db),
     course_service: CourseService = Depends(CourseService)
     ) -> List[CourseSchema]:
     try:
+        if await auth_service.check_revoked(db, access_token):
+            logger.warning(f"(Get courses) Token is revoked: {access_token}")
+            raise HTTPException(status_code=403, detail="Token revoked")
+        
+        token_data = await auth_service.get_data_from_access_token(access_token)
+        role = token_data["role"]
+
+        if role != "admin":
+            logger.warning(f"(Get courses) Bad token: {access_token}")
+            raise HTTPException(status_code=403, detail="Not allowed")
         courses = await course_service.get_courses(db, skip=skip, limit=limit)
 
         logger.info(f"(Get courses) Successfully retrieved {len(courses)} courses")
@@ -101,38 +140,6 @@ async def get_courses(
         logger.error(f"(Get courses) Error: {e}", exc_info=True)
         logger.error(traceback.format_exc())
         raise HTTPException(status_code=500, detail="Internal server error")
-    
-@course_router.get(
-    "/active",
-    tags=["Course"],
-    response_model=List[CourseSchema],
-    responses={
-        200: {
-            "model": List[CourseSchema]
-            },
-        500: {
-            "model": ErrorSchema, 
-            "description": "Internal server error"
-            }
-    }
-)
-async def get_not_deleted_courses(
-    skip: int = 0, 
-    limit: int = 10,
-    db: AsyncSession = Depends(get_db),
-    course_service: CourseService = Depends(CourseService)
-    ) -> List[CourseSchema]:
-    try:
-        courses = await course_service.get_not_deleted_courses(db, skip=skip, limit=limit)
-
-        logger.info(f"(Get not deleted courses) Successfully retrieved {len(courses)} courses")
-        return courses
-    
-    except Exception as e:
-        logger.error(f"(Get not deleted courses) Error: {e}", exc_info=True)
-        logger.error(traceback.format_exc())
-        raise HTTPException(status_code=500, detail="Internal server error")
-
 
 @course_router.get(
     "/tasks",
@@ -143,6 +150,14 @@ async def get_not_deleted_courses(
             "model": List[CourseWithTasksSchema],
             "description": "List of courses with tasks"
         },
+        401:{
+            "model": ErrorSchema,
+            "description": "Unauthorized"
+        },
+        403:{
+            "model": ErrorSchema,
+            "description": "Bad token"
+        },
         500: {
             "model": ErrorSchema,
             "description": "Internal server error"
@@ -152,10 +167,23 @@ async def get_not_deleted_courses(
 async def get_courses_with_tasks(
     skip: int = 0,
     limit: int = 5,
+    access_token: str = Depends(oauth2_scheme),
+    auth_service: AuthService = Depends(AuthService),
     db: AsyncSession = Depends(get_db),
     course_service: CourseService = Depends(CourseService)
     ) -> List[CourseWithTasksSchema]:
     try:
+        if await auth_service.check_revoked(db, access_token):
+            logger.warning(f"(Get courses with tasks) Token is revoked: {access_token}")
+            raise HTTPException(status_code=403, detail="Token revoked")
+        
+        token_data = await auth_service.get_data_from_access_token(access_token)
+        role = token_data["role"]
+
+        if role != "admin":
+            logger.warning(f"(Get courses with tasks) Bad token: {access_token}")
+            raise HTTPException(status_code=403, detail="Not allowed")
+        
         courses = await course_service.get_courses_with_tasks(db, skip=skip, limit=limit)
 
         logger.info(f"(Get courses with tasks) Successfully retrieved {len(courses)} courses")
@@ -163,6 +191,45 @@ async def get_courses_with_tasks(
 
     except Exception as e:
         logger.error(f"(Get courses with tasks) Error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+@course_router.get(
+    "/active",
+    tags=["Course"],
+    response_model=List[CourseSchema],
+    responses={
+        200: {
+            "model": List[CourseSchema]
+        },
+        401:{
+            "model": ErrorSchema,
+            "description": "Unauthorized"
+        },
+        403:{
+            "model": ErrorSchema,
+            "description": "Bad token"
+        },
+        500: {
+            "model": ErrorSchema, 
+            "description": "Internal server error"
+        }
+    }
+)
+async def get_active_courses(
+    skip: int = 0, 
+    limit: int = 10,
+    db: AsyncSession = Depends(get_db),
+    course_service: CourseService = Depends(CourseService)
+    ) -> List[CourseSchema]:
+    try:
+        courses = await course_service.get_active_courses(db, skip=skip, limit=limit)
+
+        logger.info(f"(Get active courses) Successfully retrieved {len(courses)} courses")
+        return courses
+    
+    except Exception as e:
+        logger.error(f"(Get active courses) Error: {e}", exc_info=True)
+        logger.error(traceback.format_exc())
         raise HTTPException(status_code=500, detail="Internal server error")
 
 @course_router.get(
@@ -192,7 +259,7 @@ async def get_course(
         course = await course_service.get_course_by_id(db, course_id)
 
         if not course:
-            logger.info(f"(Get course by ID) Course not found: {course_id}")
+            logger.warning(f"(Get course by ID) Course not found: {course_id}")
             raise HTTPException(status_code=404, detail="Course not found")
 
         logger.info(f"(Get course by ID) Course successfully found: {course.id}")
@@ -205,9 +272,6 @@ async def get_course(
         logger.error(f"(Get course by ID) Error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error")
 
-"""
-Добавить проверку на авторизацию и права администратора 
-"""
 @course_router.put(
     "/{course_id}",
     tags=["Course"],
@@ -220,6 +284,14 @@ async def get_course(
         400: {
             "model": ErrorSchema,
             "description": "Validation error"
+        },
+        401:{
+            "model": ErrorSchema,
+            "description": "Unauthorized"
+        },
+        403:{
+            "model": ErrorSchema,
+            "description": "Bad token"
         },
         404: {
             "model": ErrorSchema,
@@ -234,10 +306,23 @@ async def get_course(
 async def update_course(
     course_id: int,
     course_data: CourseUpdateSchema,
+    access_token: str = Depends(oauth2_scheme),
+    auth_service: AuthService = Depends(AuthService),
     db: AsyncSession = Depends(get_db),
     course_service: CourseService = Depends(CourseService)
     ) -> MessageSchema:
     try:
+        if await auth_service.check_revoked(db, access_token):
+            logger.warning(f"(Update course) Token is revoked: {access_token}")
+            raise HTTPException(status_code=403, detail="Token revoked")
+        
+        token_data = await auth_service.get_data_from_access_token(access_token)
+        role = token_data["role"]
+
+        if role != "admin":
+            logger.warning(f"(Update course) Bad token: {access_token}")
+            raise HTTPException(status_code=403, detail="Not allowed")
+
         updated_course = await course_service.update_course(
             db = db,
             course_id=course_id,
@@ -256,7 +341,7 @@ async def update_course(
         """
         Поменять статус ошибки, если нужно будет
         """
-        if updated_course == "no_changes":
+        if updated_course == None:
             return MessageSchema(
                 messageDigest=str(course_id),
                 description="(Update course) No changes provided for the course"
@@ -276,10 +361,6 @@ async def update_course(
         logger.error(f"(Update course) Error: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
-
-"""
-Добавить проверку на авторизацию и права администратора 
-"""
 @course_router.put(
     "/{course_id}/delete",
     tags=["Course"],
@@ -288,6 +369,14 @@ async def update_course(
         200: {
             "model": MessageSchema,
             "description": "Course marked as deleted"
+        },
+        401:{
+            "model": ErrorSchema,
+            "description": "Unauthorized"
+        },
+        403:{
+            "model": ErrorSchema,
+            "description": "Bad token"
         },
         404: {
             "model": ErrorSchema,
@@ -302,9 +391,22 @@ async def update_course(
 async def soft_delete_course(
     course_id: int,
     db: AsyncSession = Depends(get_db),
+    access_token: str = Depends(oauth2_scheme),
+    auth_service: AuthService = Depends(AuthService),
     course_service: CourseService = Depends(CourseService)
     ) -> MessageSchema:
     try:
+        if await auth_service.check_revoked(db, access_token):
+            logger.warning(f"(Delete status course) Token is revoked: {access_token}")
+            raise HTTPException(status_code=403, detail="Token revoked")
+        
+        token_data = await auth_service.get_data_from_access_token(access_token)
+        role = token_data["role"]
+
+        if role != "admin":
+            logger.warning(f"(Delete status course) Bad token: {access_token}")
+            raise HTTPException(status_code=403, detail="Not allowed")
+        
         deleted_course = await course_service.delete_status_course(db, course_id)
 
         if not deleted_course:
@@ -325,10 +427,6 @@ async def soft_delete_course(
         logger.error(traceback.format_exc())
         raise HTTPException(status_code=500, detail="Internal server error")
 
-"""
-Добавить проверку на авторизацию и права администратора 
-"""
-
 @course_router.delete(
     "/{course_id}/delete",
     tags=["Course"],
@@ -337,6 +435,14 @@ async def soft_delete_course(
         200: {
             "model": MessageSchema,
             "description": "Course deleted successfully"
+        },
+        401:{
+            "model": ErrorSchema,
+            "description": "Unauthorized"
+        },
+        403:{
+            "model": ErrorSchema,
+            "description": "Bad token"
         },
         404: {
             "model": ErrorSchema,
@@ -351,9 +457,22 @@ async def soft_delete_course(
 async def hard_delete_course(
     course_id: int,
     db: AsyncSession = Depends(get_db),
+    access_token: str = Depends(oauth2_scheme),
+    auth_service: AuthService = Depends(AuthService),
     course_service: CourseService = Depends(CourseService)
     ) -> MessageSchema:
     try:
+        if await auth_service.check_revoked(db, access_token):
+            logger.warning(f"(Delete course) Token is revoked: {access_token}")
+            raise HTTPException(status_code=403, detail="Token revoked")
+        
+        token_data = await auth_service.get_data_from_access_token(access_token)
+        role = token_data["role"]
+
+        if role != "admin":
+            logger.warning(f"(Delete course) Bad token: {access_token}")
+            raise HTTPException(status_code=403, detail="Not allowed")
+        
         deleted_course = await course_service.delete_course(db, course_id)
 
         if not deleted_course:

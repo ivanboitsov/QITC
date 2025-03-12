@@ -55,9 +55,7 @@ class ApplicationService:
             )
 
             db.add(application)
-            self.logger.info(f"Adding application: {application.__dict__}")
             await db.commit()
-            self.logger.info("Commit successful")
             await db.refresh(application)
 
             self.logger.info(f"(Create application) Application with ID {application.id} was suuccessull created")
@@ -74,7 +72,7 @@ class ApplicationService:
             application = (await db.scalars(select(Application).where(Application.id == _id))).first()
 
             if not application:
-                self.logger.info(f"(Get application by ID) Application with ID: {_id} not found")
+                self.logger.warning(f"(Get application by ID) Application with ID: {_id} not found")
                 return None
             
             self.logger.info(f"(Get application by ID) Found application with ID: {_id}")

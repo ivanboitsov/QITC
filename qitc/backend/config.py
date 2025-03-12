@@ -26,4 +26,4 @@ ALGORITHM = os.environ.get("ALGORITHM")
 JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY")
 JWT_REFRESH_SECRET_KEY = os.environ.get("JWT_REFRESH_SECRET_KEY")
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/qits/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/qits/user/login")

@@ -27,7 +27,7 @@ class TaskService:
                 self.logger.info(f"(Get task by ID) Found task with ID {_id}")
                 return task
             else:
-                self.logger.info(f"(Get task by ID) Task with ID {_id} not found")
+                self.logger.warning(f"(Get task by ID) Task with ID {_id} not found")
                 return None
             
         except Exception as e:
@@ -76,7 +76,7 @@ class TaskService:
                 ).first()
 
             if not task:
-                self.logger.info(f"(Update task status) Task with id {task_id} not found")
+                self.logger.warning(f"(Update task status) Task with id {task_id} not found")
                 return None
 
             if task.status != status and status != "deleted":
@@ -85,8 +85,8 @@ class TaskService:
                 await db.refresh(task)
                 self.logger.info(f"(Update task status) Status on task with id {task_id} was update successful")
             else:
-                self.logger.info(f"(Update task status) Same status on task with id {task_id}")
-                return "no_changes"
+                self.logger.warning(f"(Update task status) Same status on task with id {task_id}")
+                return None
             return task
         
         except Exception as e:
@@ -148,7 +148,7 @@ class TaskService:
                 ).first()
 
             if not task:
-                self.logger.info(f"(Update task) Task with id {task_id} not found")
+                self.logger.warning(f"(Update task) Task with id {task_id} not found")
                 return None
             
             updates = {
@@ -170,8 +170,8 @@ class TaskService:
                 await db.refresh(task)
                 self.logger.info(f"(Update task) Task with id {task_id} was update successfully")
             else:
-                self.logger.info(f"(Update task) No updates for task with id {task_id}")
-                return "no_changes"
+                self.logger.warning(f"(Update task) No updates for task with id {task_id}")
+                return None
             return task
         
         except Exception as e:
@@ -190,7 +190,7 @@ class TaskService:
                 ).first()
 
             if not task:
-                self.logger.info(f"(Delete status task) Task with id {task_id} not found")
+                self.logger.warning(f"(Delete status task) Task with id {task_id} not found")
                 return None
 
             if task.status != "deleted":
@@ -199,8 +199,8 @@ class TaskService:
                 await db.refresh(task)
                 self.logger.info(f"(Delete status task) Task with id {task_id} deleted successfully")
             else:
-                self.logger.info(f"(Delete status task) Task with id {task_id} was already delete")
-                return "already_deleted"
+                self.logger.warning(f"(Delete status task) Task with id {task_id} was already delete")
+                return None
             return task     
         except Exception as e:
             self.logger.error(f"(Delete status task) Error: {e}")
@@ -218,7 +218,7 @@ class TaskService:
                 ).first()
 
             if not task:
-                self.logger.info(f"(Delete task) Task with id {task_id} not found")
+                self.logger.warning(f"(Delete task) Task with id {task_id} not found")
                 return None
 
             await db.delete(task)

@@ -26,7 +26,7 @@ class CourseService:
                 ).first()
 
             if not course:
-                self.logger.info(f"(Get course by ID) Course with ID {_id} not found")
+                self.logger.warning(f"(Get course by ID) Course with ID {_id} not found")
                 return None
             
             self.logger.info(f"(Get course by ID) Found course with ID {_id}")
@@ -54,12 +54,12 @@ class CourseService:
             self.logger.error(traceback.format_exc())
             raise
     
-    async def get_not_deleted_courses(self, db: AsyncSession, skip: int = 0, limit: int = 10) -> List[Course]:
+    async def get_active_courses(self, db: AsyncSession, skip: int = 0, limit: int = 10) -> List[Course]:
         try:
             courses = (
                 await db.execute(
                     select(Course)
-                    .where(Course.status != "deleted")
+                    .where(Course.status != "deleted" or Course.status != "closed")
                     .offset(skip)
                     .limit(limit)
                     )
@@ -137,7 +137,7 @@ class CourseService:
             course = (await db.scalars(select(Course).where(Course.id == course_id))).first()
 
             if not course:
-                self.logger.info(f"(Update course) Course with id {course_id} not found")
+                self.logger.warning(f"(Update course) Course with id {course_id} not found")
                 return None
             
             updates = {
@@ -159,8 +159,8 @@ class CourseService:
                 await db.refresh(course)
                 self.logger.info(f"(Update course) Course with ID {course_id} was update successfully")
             else:
-                self.logger.info(f"(Update course) No updates for course with id {course_id}")
-                return "no_changes"
+                self.logger.warning(f"(Update course) No updates for course with id {course_id}")
+                return None
             return course
 
         except Exception as e:
@@ -174,7 +174,7 @@ class CourseService:
             course = (await db.scalars(select(Course).where(Course.id == course_id))).first()
 
             if not course:
-                self.logger.info(f"(Delete status course) Course with id {course_id} not found")
+                self.logger.warning(f"(Delete status course) Course with id {course_id} not found")
                 return None
             
             if course.status != "deleted":
@@ -183,7 +183,8 @@ class CourseService:
                 await db.refresh(course)
                 self.logger.info(f"(Delete status course) course with id {course_id} deleted successfully")
             else:
-                self.logger.info(f"(Delete status course) Course with id {course_id} was already delete")
+                self.logger.warning(f"(Delete status course) Course with id {course_id} was already delete")
+                return None
             
             return course
 
@@ -198,7 +199,7 @@ class CourseService:
             course = (await db.scalars(select(Course).where(Course.id == course_id))).first()
 
             if not course:
-                self.logger.info(f"(Delete course) Course with id {course_id} not found")
+                self.logger.warning(f"(Delete course) Course with id {course_id} not found")
                 return None
 
             await db.delete(course)
