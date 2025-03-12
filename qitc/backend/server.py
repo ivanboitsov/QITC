@@ -10,6 +10,7 @@ from db.db_init import db_init
 
 from routers.applicatoin_router import application_router
 from routers.course_router import course_router
+from routers.group_router import group_router
 from routers.task_router import task_router
 from routers.user_router import user_router
 
@@ -20,6 +21,7 @@ router = APIRouter(prefix="/api/v1/qitc")
 
 router.include_router(application_router)
 router.include_router(course_router)
+router.include_router(group_router)
 router.include_router(task_router)
 router.include_router(user_router)
 
