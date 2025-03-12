@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Enum
 from sqlalchemy.orm import relationship
 from db.db_config import Base
+from models.tables.journal import Journal
 
 class Task(Base):
     __tablename__ = 'task'
@@ -11,6 +12,7 @@ class Task(Base):
     status = Column(Enum('closed', 'inProcess', 'done', 'deleted', name="task_status"), default='closed', nullable=False)
     course_id = Column(Integer, ForeignKey('course.id'), nullable=False)
 
+    users = relationship("User", secondary=Journal.__table__, back_populates="tasks", lazy='select')
     course = relationship("Course", back_populates="tasks")
 
     def __repr__(self):
