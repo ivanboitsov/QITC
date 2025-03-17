@@ -110,4 +110,5 @@ class BackupService:
 
         except Exception as e:
             self.logger.error(f"(Backup restore) Error: {e}")
+            self.logger.error(traceback.format_exc())
             raise
