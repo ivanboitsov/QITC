@@ -15,6 +15,9 @@ from models.tables.course import Course
 from models.tables.task import Task
 from models.tables.journal import Journal
 
+from models.schemas.group_schemas import GroupCourseWithStudentsSchema, GroupSchema
+from models.schemas.user_schemas import UserProfileSchema
+
 class GroupService:
     def __init__(self):
         logging.basicConfig(level=logging.INFO)
@@ -100,46 +103,79 @@ class GroupService:
             await db.rollback()
             raise
 
-    async def get_students_by_course_id(self, db: AsyncSession, course_id: int) -> Optional[Group]:
+    async def get_students_by_course_id(self, db: AsyncSession, course_id: int) -> Optional[GroupCourseWithStudentsSchema]:
         try:
             query = (
                 select(Course)
-                .options(joinedload(Course.students))
+                .options(joinedload(Course.users))
                 .filter(Course.id == course_id)
             )
-            result = await AsyncSession.execute(query)
+            result = await db.execute(query)
             course = result.scalars().first()
 
             if not course:
                 self.logger.warning(f"(Get students by course ID) Course with ID {course_id} not found")
                 return None
-            
-            self.logger.info(f"(Get students by course ID) Course with ID {course_id} successfuly found")
-            return course
-        
+
+            students = [
+                UserProfileSchema(
+                    name=user.name,
+                    email=user.email,
+                    role=user.role
+                )
+                for user in course.users
+            ]
+
+            course_schema = GroupCourseWithStudentsSchema(
+                id=course.id,
+                name=course.name,
+                description=course.description,
+                students_count=course.students_count,
+                students=students
+            )
+
+            self.logger.info(f"(Get students by course ID) Course with ID {course_id} successfully found")
+            return course_schema
+
         except Exception as e:
             self.logger.error(f"(Get students by course ID) Error: {e}")
             self.logger.error(traceback.format_exc())
             raise
 
-    async def get_all_groups(self, db: AsyncSession, skip: int = 0, limit: int = 10) -> List[Group]:
+    async def get_all_groups(self, db: AsyncSession, skip: int = 0, limit: int = 10) -> List[GroupCourseWithStudentsSchema]:
         try:
             result = await db.execute(
-            select(Course)
-            .options(joinedload(Course.users))
-            .offset(skip)
-            .limit(limit)
+                select(Course)
+                .options(joinedload(Course.users))
+                .offset(skip)
+                .limit(limit)
             )
-            groups = result.unique().scalars().all()
+            courses = result.unique().scalars().all()
 
-            self.logger.error(f"(Get students groups) Retrieved {len(groups)} groups")
+            groups = []
+            for course in courses:
+                students = [
+                    UserProfileSchema(
+                        name=user.name,
+                        email=user.email,
+                        role=user.role
+                    )
+                    for user in course.users
+                ]
+
+                course_schema = GroupCourseWithStudentsSchema(
+                    id=course.id,
+                    name=course.name,
+                    description=course.description,
+                    students_count=course.students_count,
+                    students=students
+                )
+                groups.append(course_schema)
+
+            self.logger.info(f"(Get all groups) Retrieved {len(groups)} groups")
             return groups
-        
+
         except Exception as e:
-            self.logger.error(f"(Get students groups) Error: {e}")
+            self.logger.error(f"(Get all groups) Error: {e}")
             self.logger.error(traceback.format_exc())
             raise
-
-    
-        
-    

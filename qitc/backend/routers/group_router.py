@@ -136,8 +136,6 @@ async def remove_student_from_course(
         logger.error(f"(Remove student from course) Error: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
-"""
-
 @group_router.get(
     "/students/courses",
     tags=["Group"],
@@ -246,5 +244,3 @@ async def get_students_list_by_course_id(
     except Exception as e:
         logger.error(f"(Get students by course ID) Error: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
-
-"""
