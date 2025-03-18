@@ -110,6 +110,12 @@ export default function ApplicationFrom() {
                 </p>
               </div>
               <div className="flex-1">
+                {/* Отображение ошибки */}
+                  {error && (
+                    <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                      {error}
+                    </div>
+                  )}
                 <form className="space-y-6" onSubmit={handleSubmit}>
                   <div>
                     <Label htmlFor="user_name" className="text-2xl">Имя</Label>

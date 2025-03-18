@@ -2,7 +2,6 @@
 
 import { Button } from "../ui/button";
 import { UserRound  } from 'lucide-react';
-import PixelRectangleIcon from "./pixel-rectangle-icon";
 
 export default function Header() {
 

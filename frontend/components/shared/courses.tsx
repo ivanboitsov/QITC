@@ -1,5 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
 import axios from 'axios';
 
 interface Course {
@@ -51,7 +52,7 @@ const Courses = () => {
           {courses.map((course) => (
             <div key={course.id} className="cassette-wrapper">
               <div className="cassette-container">
-                <img src="audio.png" alt="Cassette" className="cassette-image" />
+                <Image src="/audio.png" alt="Cassette" className="cassette-image" width={512} height={512}/>
                 <div className="course-name">{course.name}</div>
               </div>
             </div>
