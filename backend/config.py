@@ -17,6 +17,12 @@ DB_PASS = os.environ.get("DB_PASS")
 
 assert all([DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS]), "Database configuration is incomplete"
 
+YANDEX_CLIENT_ID = os.environ.get("YANDEX_CLIENT_ID")
+YANDEX_CLIENT_SECRET = os.environ.get("YANDEX_CLIENT_SECRET")
+
+VK_CLIENT_ID = os.environ.get("VK_CLIENT_ID")
+VK_CLIENT_SECRET = os.environ.get("VK_CLIENT_SECRET")
+
 MIN_PASSWORD_LENGTH = os.environ.get("MIN_PASSWORD_LENGTH")
 
 ACCESS_TOKEN_EXPIRE_MINUTES = os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES")

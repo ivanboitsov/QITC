@@ -10,10 +10,12 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.tables.user import CRL
-from config import oauth2_scheme, ACCESS_TOKEN_EXPIRE_MINUTES, ALGORITHM, JWT_SECRET_KEY
-
+from authlib.integrations.starlette_client import OAuth
+from config import oauth2_scheme, ACCESS_TOKEN_EXPIRE_MINUTES, ALGORITHM, JWT_SECRET_KEY, YANDEX_CLIENT_ID, YANDEX_CLIENT_SECRET, VK_CLIENT_ID, VK_CLIENT_SECRET
 
 password_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+oauth = OAuth()
 
 class AuthService:
     def __init__(self):
@@ -23,6 +25,32 @@ class AuthService:
         self.TOKEN_LIFETIME = int(ACCESS_TOKEN_EXPIRE_MINUTES)
         self.SECRET_KEY = str(JWT_SECRET_KEY)
         self.ALGORITHM = str(ALGORITHM)
+
+    oauth.register(
+    name='yandex',
+    client_id=str(YANDEX_CLIENT_ID),
+    client_secret=str(YANDEX_CLIENT_SECRET),
+    authorize_url='https://oauth.yandex.ru/authorize',
+    authorize_params=None,
+    access_token_url='https://oauth.yandex.ru/token', 
+    access_token_params=None,
+    refresh_token_url=None,
+    redirect_uri='http://localhost:8000/api/v1/qitc/auth/yandex/callback',
+    client_kwargs={'scope': 'login:email login:info'},
+    )
+
+    oauth.register(
+        name='vk',
+        client_id=str(VK_CLIENT_ID),
+        client_secret=str(VK_CLIENT_SECRET),
+        authorize_url='https://oauth.vk.com/authorize',
+        authorize_params=None,
+        access_token_url='https://oauth.vk.com/access_token',
+        access_token_params=None,
+        refresh_token_url=None,
+        redirect_uri='http://localhost:8000/api/v1/qitc/auth/vk/callback',
+        client_kwargs={'scope': 'email'},
+    )
 
     @staticmethod
     def get_hashed_password(password: str) -> str:
