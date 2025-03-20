@@ -16,6 +16,10 @@ class User(Base):
     role = Column(Enum('user', 'student', 'admin', name='user_role'), nullable=False, default='user')
     user_date_auth = Column(DateTime, server_default=func.now())
 
+    auth_provider = Column(String, nullable=True)
+    provider_user_id = Column(String, nullable=True)
+    provider_user_data = Column(String, nullable=True)
+
     courses = relationship("Course", secondary=Group.__table__, back_populates="users", lazy='select')
     tasks = relationship("Task", secondary=Journal.__table__, back_populates="users", lazy='select')
 
