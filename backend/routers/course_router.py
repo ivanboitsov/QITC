@@ -179,19 +179,12 @@ async def get_courses_with_tasks(
     course_service: CourseService = Depends(CourseService)
     ) -> List[CourseWithTasksSchema]:
     """
-    Просмотр всех курсов с их задачами (только для администратора)
+    Просмотр всех курсов с их задачами
     """
     try:
         if await auth_service.check_revoked(db, access_token):
             logger.warning(f"(Get courses with tasks) Token is revoked: {access_token}")
             raise HTTPException(status_code=403, detail="Token revoked")
-        
-        token_data = await auth_service.get_data_from_access_token(access_token)
-        role = token_data["role"]
-
-        if role != "admin":
-            logger.warning(f"(Get courses with tasks) Bad token: {access_token}")
-            raise HTTPException(status_code=403, detail="Not allowed")
         
         courses = await course_service.get_courses_with_tasks(db, skip=skip, limit=limit)
 
@@ -231,7 +224,7 @@ async def get_active_courses(
     course_service: CourseService = Depends(CourseService)
     ) -> List[CourseSchema]:
     """
-    Просмотр всех неудалённых курсов (только для администратора)
+    Просмотр всех неудалённых курсов
     """
     try:
         courses = await course_service.get_active_courses(db, skip=skip, limit=limit)
@@ -268,7 +261,7 @@ async def get_course(
     course_service: CourseService = Depends(CourseService)
     ) -> CourseWithTasksSchema:
     """
-    Просмотр конкретного курса по ID с его задачами (только для администратора)
+    Просмотр конкретного курса по ID с его задачами
     """
     try:
         course = await course_service.get_course_by_id(db, course_id)
