@@ -43,13 +43,16 @@ backup_router = APIRouter(prefix="/backup", tags=["Backup"])
         )
 async def create_backup(
     backup_dir: str = "backups",
-    #db: AsyncSession = Depends(get_db),
-    #access_token: str = Depends(oauth2_scheme),
-    #auth_service: AuthService = Depends(AuthService),
+    db: AsyncSession = Depends(get_db),
+    access_token: str = Depends(oauth2_scheme),
+    auth_service: AuthService = Depends(AuthService),
     backup_service: BackupService = Depends(BackupService)
     ):
+    """
+    Создание бэкапа бд (только для администратора)
+    """
     try:
-        '''if await auth_service.check_revoked(db, access_token):
+        if await auth_service.check_revoked(db, access_token):
             logger.warning(f"(Create course) Token is revoked: {access_token}")
             raise HTTPException(status_code=403, detail="Token revoked")
         
@@ -59,7 +62,7 @@ async def create_backup(
         if role != "admin":
             logger.warning(f"(Create course) Bad token: {access_token}")
             raise HTTPException(status_code=403, detail="Not allowed")
-        '''
+        
         backup_file = await backup_service.create_backup(backup_dir)
         logger.info(f"(Create backup) Backup successfully created")
 
@@ -95,13 +98,16 @@ async def create_backup(
         )
 async def restore_backup(
     backup_file: str,
-    #db: AsyncSession = Depends(get_db),
-    #access_token: str = Depends(oauth2_scheme),
-    #auth_service: AuthService = Depends(AuthService),
+    db: AsyncSession = Depends(get_db),
+    access_token: str = Depends(oauth2_scheme),
+    auth_service: AuthService = Depends(AuthService),
     backup_service: BackupService = Depends(BackupService) 
     ):
+    """
+    Восстановление бэкапа бд (только для администартора)
+    """
     try:
-        '''if await auth_service.check_revoked(db, access_token):
+        if await auth_service.check_revoked(db, access_token):
             logger.warning(f"(Create course) Token is revoked: {access_token}")
             raise HTTPException(status_code=403, detail="Token revoked")
         
@@ -111,7 +117,7 @@ async def restore_backup(
         if role != "admin":
             logger.warning(f"(Create course) Bad token: {access_token}")
             raise HTTPException(status_code=403, detail="Not allowed")
-        '''
+        
         await backup_service.restore_backup(backup_file)
         logger.info(f"(Restore backup) Backup successfully restored")
 

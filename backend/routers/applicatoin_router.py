@@ -43,6 +43,9 @@ async def create_application(
     application_service: ApplicationService = Depends(ApplicationService),
     db: AsyncSession = Depends(get_db)
     ) -> MessageSchema:
+    """
+    Создание заявки
+    """
     try:
         application = await application_service.create_application(
             db=db,
@@ -99,6 +102,9 @@ async def get_applications(
     application_service: ApplicationService = Depends(ApplicationService),
     auth_service: AuthService = Depends(AuthService)
     ) -> List[ApplicationSchema]:
+    """
+    Просмотр всех заявок (только для администратора)
+    """
     try:
         if await auth_service.check_revoked(db, access_token):
             logger.warning(f"(Get applications) Token is revoked: {access_token}")
@@ -153,6 +159,9 @@ async def get_application(
     application_service: ApplicationService = Depends(ApplicationService),
     auth_service: AuthService = Depends(AuthService)
     ) -> ApplicationSchema:
+    """
+    Просмотр конкретной заявки (только для администратора)
+    """
     try:
         if await auth_service.check_revoked(db, access_token):
             logger.warning(f"(Get application by id) Token is revoked: {access_token}")

@@ -53,6 +53,9 @@ async def create_task(
             task_service: TaskService = Depends(TaskService),
             auth_service: AuthService = Depends(AuthService)
     ) -> MessageSchema:
+    """
+    Создание задания (только для администратора)
+    """
     try:
         if await auth_service.check_revoked(db, access_token):
             logger.warning(f"(Create task) Token is revoked: {access_token}")
@@ -122,6 +125,9 @@ async def get_tasks(
     auth_service: AuthService = Depends(AuthService),
     task_service: TaskService = Depends(TaskService)
     ) -> List[TaskSchema]:
+    """
+    Получение списка заданий (только для администратора)
+    """
     try:
 
         if await auth_service.check_revoked(db, access_token):
@@ -179,6 +185,9 @@ async def get_task(
     auth_service: AuthService = Depends(AuthService),
     task_service: TaskService = Depends(TaskService)
     ) -> TaskSchema:
+    """
+    Получение задания по ID (только для администратора)
+    """
     try:
         if await auth_service.check_revoked(db, access_token):
             logger.warning(f"(Get task by ID) Token is revoked: {access_token}")
@@ -248,6 +257,9 @@ async def update_task(
     auth_service: AuthService = Depends(AuthService),
     task_service: TaskService = Depends(TaskService)
     ) -> MessageSchema:
+    """
+    Изменение данных задания (только для администратора)
+    """
     try:
         if await auth_service.check_revoked(db, access_token):
             logger.warning(f"(Update task) Token is revoked: {access_token}")
@@ -335,6 +347,9 @@ async def update_status_task(
     auth_service: AuthService = Depends(AuthService),
     task_service: TaskService = Depends(TaskService)
     ) -> MessageSchema:
+    """
+    Изменение статуса задания (только для администратора)
+    """
     try:
         if await auth_service.check_revoked(db, access_token):
             logger.warning(f"(Update status task) Token is revoked: {access_token}")
@@ -417,6 +432,9 @@ async def soft_delete_task(
         auth_service: AuthService = Depends(AuthService),
         task_service: TaskService = Depends(TaskService)
     ) -> MessageSchema:
+    """
+    Изменения статуса задания на удалённый (только для администратора)
+    """
     try:
         if await auth_service.check_revoked(db, access_token):
             logger.warning(f"(Delete status task) Token is revoked: {access_token}")
@@ -483,6 +501,9 @@ async def hard_delete_task(
     auth_service: AuthService = Depends(AuthService),
     task_service: TaskService = Depends(TaskService)
     ) -> MessageSchema:
+    """
+    Удаление задания (только для администратора)
+    """
     try:
         if await auth_service.check_revoked(db, access_token):
             logger.warning(f"(Delete task) Token is revoked: {access_token}")

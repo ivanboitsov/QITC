@@ -54,6 +54,9 @@ async def add_student_on_course(
     auth_service: AuthService = Depends(AuthService),
     group_service: GroupService = Depends(GroupService)
     ) -> MessageSchema:
+    """
+    Добавление студента в группу (только для администратора)
+    """
     try:
         if await auth_service.check_revoked(db, access_token):
             logger.warning(f"(Add student to course) Token is revoked: {access_token}")
@@ -114,6 +117,9 @@ async def remove_student_from_course(
     auth_service: AuthService = Depends(AuthService),
     group_service: GroupService = Depends(GroupService)
     ) -> MessageSchema:
+    """
+    Удаление студента из группы (только для администратора)
+    """
     try:
         if await auth_service.check_revoked(db, access_token):
             logger.warning(f"(Remove student from course) Token is revoked: {access_token}")
@@ -167,6 +173,9 @@ async def get_all_groups(
     auth_service: AuthService = Depends(AuthService),
     group_service: GroupService = Depends(GroupService)
 ) -> List[GroupCourseWithStudentsSchema]:
+    """
+    Получение списка всех студентов всех курсов (только для администратора)
+    """
     try:
         if await auth_service.check_revoked(db, access_token):
             logger.warning(f"(Get all groups) Token is revoked: {access_token}")
@@ -220,6 +229,9 @@ async def get_students_list_by_course_id(
     auth_service: AuthService = Depends(AuthService),
     group_service: GroupService = Depends(GroupService)
 ) -> GroupCourseWithStudentsSchema:
+    """
+    Получене списка студентов по конкретном курсу (только для администратора)
+    """
     try:
         if await auth_service.check_revoked(db, access_token):
             logger.warning(f"(Get students by course ID) Token is revoked: {access_token}")

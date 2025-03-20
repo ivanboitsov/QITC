@@ -40,7 +40,7 @@ auth_router = APIRouter(prefix="/auth", tags=["Auth"])
 )
 async def auth_yandex(request: Request):
     """
-    Перенаправляет пользователя на страницу авторизации Yandex.
+    Перенаправляет пользователя на страницу авторизации Yandex
     """
     try:
         redirect_uri = "http://localhost:8000/api/v1/qitc/auth/yandex/callback"
@@ -77,7 +77,7 @@ async def auth_yandex_callback(
     user_service: UserService = Depends(UserService),
 ) -> AccessTokenSchema:
     """
-    Обрабатывает callback от Yandex OAuth и возвращает JWT токен.
+    Обрабатывает callback от Yandex OAuth и возвращает JWT токен
     """
     try:
         token = await oauth.yandex.authorize_access_token(request)
@@ -129,7 +129,7 @@ async def auth_yandex_callback(
 )
 async def auth_vk(request: Request):
     """
-    Перенаправляет пользователя на страницу авторизации VK.
+    Перенаправляет пользователя на страницу авторизации VK
     """
     try:
         redirect_uri = "http://localhost:8000/api/v1/qitc/auth/vk/callback"
@@ -165,7 +165,7 @@ async def auth_vk_callback(
     user_service: UserService = Depends(UserService),
 ) -> AccessTokenSchema:
     """
-    Обрабатывает callback от VK OAuth и возвращает JWT токен.
+    Обрабатывает callback от VK OAuth и возвращает JWT токен
     """
     try:
         token = await oauth.vk.authorize_access_token(request)

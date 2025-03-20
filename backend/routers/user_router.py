@@ -46,6 +46,9 @@ async def user_register(
     db: AsyncSession = Depends(get_db),
     user_service: UserService = Depends(UserService)
     ) -> MessageSchema:
+    """
+    Регистрация пользователя
+    """
     try:
 
         user = await user_service.get_user_by_email(db, user_data.email)
@@ -101,6 +104,9 @@ async def login(
     user_service: UserService = Depends(UserService),
     auth_service: AuthService = Depends(AuthService),
     ) -> AccessTokenSchema:
+    """
+    Авторизация пользователя
+    """
     try:
         if not await user_service.verify_password(db, user_data.email, user_data.password):
             logger.warning(f"(Login) Failed login for user with email: {user_data.email}")
@@ -152,6 +158,9 @@ async def logout(
     db: AsyncSession = Depends(get_db),
     auth_service: AuthService = Depends(AuthService),
     ) -> MessageSchema:
+    """
+    Выход из учётной записи
+    """
     try:
         if await auth_service.check_revoked(db, access_token):
             logger.warning(f"(Logout) Token is revoked: {access_token}")
@@ -205,6 +214,9 @@ async def get_profiles(
     user_service: UserService = Depends(UserService),
     auth_service: AuthService = Depends(AuthService)
     ) -> List[UserSchema]:
+    """
+    Получение списка пользователей (только для администратора)
+    """
     try:
         if await auth_service.check_revoked(db, access_token):
             logger.warning(f"(Get users profiles) Token is revoked: {access_token}")
@@ -264,6 +276,9 @@ async def get_profile(
     user_service: UserService = Depends(UserService),
     auth_service: AuthService = Depends(AuthService)
     ) -> UserProfileSchema:
+    """
+    Получение данных пользователя
+    """
     try:
         if await auth_service.check_revoked(db, access_token):
             logger.warning(f"(Get user profile) Token is revoked: {access_token}")
@@ -321,6 +336,9 @@ async def update_profile(
     user_service: UserService = Depends(UserService),
     auth_service: AuthService = Depends(AuthService)
     ) -> MessageSchema:
+    """
+    Обвновление данных пользователя
+    """
     try:
         if await auth_service.check_revoked(db, access_token):
             logger.warning(f"(Update user profile) Token is revoked: {access_token}")
@@ -399,6 +417,9 @@ async def update_status_profile(
     user_service: UserService = Depends(UserService),
     auth_service: AuthService = Depends(AuthService)
     ) -> MessageSchema:
+    """
+    Обновление статуса пользователя
+    """
     try:
         if await auth_service.check_revoked(db, access_token):
             logger.warning(f"(Update user status) Token is revoked: {access_token}")

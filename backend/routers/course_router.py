@@ -54,6 +54,9 @@ async def create_course(
     auth_service: AuthService = Depends(AuthService),
     course_service: CourseService = Depends(CourseService)
     ) -> MessageSchema:
+    """
+    Создание курса (только для администратора)
+    """
     try:
         if await auth_service.check_revoked(db, access_token):
             logger.warning(f"(Create course) Token is revoked: {access_token}")
@@ -120,6 +123,9 @@ async def get_courses(
     db: AsyncSession = Depends(get_db),
     course_service: CourseService = Depends(CourseService)
     ) -> List[CourseSchema]:
+    """
+    Просмотр всех курсов (только для администратора)
+    """
     try:
         if await auth_service.check_revoked(db, access_token):
             logger.warning(f"(Get courses) Token is revoked: {access_token}")
@@ -172,6 +178,9 @@ async def get_courses_with_tasks(
     db: AsyncSession = Depends(get_db),
     course_service: CourseService = Depends(CourseService)
     ) -> List[CourseWithTasksSchema]:
+    """
+    Просмотр всех курсов с их задачами (только для администратора)
+    """
     try:
         if await auth_service.check_revoked(db, access_token):
             logger.warning(f"(Get courses with tasks) Token is revoked: {access_token}")
@@ -221,6 +230,9 @@ async def get_active_courses(
     db: AsyncSession = Depends(get_db),
     course_service: CourseService = Depends(CourseService)
     ) -> List[CourseSchema]:
+    """
+    Просмотр всех неудалённых курсов (только для администратора)
+    """
     try:
         courses = await course_service.get_active_courses(db, skip=skip, limit=limit)
 
@@ -255,6 +267,9 @@ async def get_course(
     db: AsyncSession = Depends(get_db),
     course_service: CourseService = Depends(CourseService)
     ) -> CourseWithTasksSchema:
+    """
+    Просмотр конкретного курса по ID с его задачами (только для администратора)
+    """
     try:
         course = await course_service.get_course_by_id(db, course_id)
 
@@ -311,6 +326,9 @@ async def update_course(
     db: AsyncSession = Depends(get_db),
     course_service: CourseService = Depends(CourseService)
     ) -> MessageSchema:
+    """
+    Обвновление данных курса (только для администратора)
+    """
     try:
         if await auth_service.check_revoked(db, access_token):
             logger.warning(f"(Update course) Token is revoked: {access_token}")
@@ -395,6 +413,9 @@ async def soft_delete_course(
     auth_service: AuthService = Depends(AuthService),
     course_service: CourseService = Depends(CourseService)
     ) -> MessageSchema:
+    """
+    Обновление статуса курса на удалённый (только для администратора)
+    """
     try:
         if await auth_service.check_revoked(db, access_token):
             logger.warning(f"(Delete status course) Token is revoked: {access_token}")
@@ -461,6 +482,9 @@ async def hard_delete_course(
     auth_service: AuthService = Depends(AuthService),
     course_service: CourseService = Depends(CourseService)
     ) -> MessageSchema:
+    """
+    Удаление курса из базы данных (только для администратора)
+    """
     try:
         if await auth_service.check_revoked(db, access_token):
             logger.warning(f"(Delete course) Token is revoked: {access_token}")
