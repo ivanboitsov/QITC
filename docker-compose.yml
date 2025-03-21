@@ -11,6 +11,7 @@ services:
       - .env
     depends_on:
       - db
+
   frontend:
     build:
       context: ./frontend
@@ -31,6 +32,7 @@ services:
       - ./backend/backups:/backups
     ports:
       - "5432:5432"
+    entrypoint: ["bash", "-c", "chmod +x /backups/restore.sh && docker-entrypoint.sh postgres & /backups/restore.sh && wait"]
 
 volumes:
   postgres_data:
