@@ -11,18 +11,18 @@
 
 # Как запустить проект
 
-1. Добавить в папку проекта файл .env с описаннымим ниже переменными или просто взять их из примера ниже:
+1. Клонировать данный репозиторий в любое удобное вам место командой:
+
+    ```
+    git clone https://github.com/ivanboitsov/QITC.git
+    ```
+
+2. Добавить в папку проекта файл .env с описаннымим ниже переменными или просто взять их из примера ниже:
+
     ```env
     POSTGRES_DB=qitc_db
     POSTGRES_USER=postgres
     POSTGRES_PASSWORD=1234
-
-    # Нужно вписать свои данные
-    VK_CLIENT_ID=VK_CLIENT_ID
-    VK_CLIENT_SECRET=VK_CLIENT_SECRET
-
-    YANDEX_CLIENT_ID=YANDEX_CLIENT_ID 
-    YANDEX_CLIENT_SECRET=YANDEX_CLIENT_SECRET
 
     DB_HOST=db
     DB_PORT=5432
@@ -40,9 +40,16 @@
 
     JWT_SECRET_KEY=abc123def456ghi789jkl012mno345pqr678stu901vwx234t
     JWT_REFRESH_SECRET_KEY=zyx987wvu654tsr321qpo098nml765kji432hgf109edc
+
+    # Нужно вписать свои данные
+    VK_CLIENT_ID=VK_CLIENT_ID
+    VK_CLIENT_SECRET=VK_CLIENT_SECRET
+
+    YANDEX_CLIENT_ID=YANDEX_CLIENT_ID 
+    YANDEX_CLIENT_SECRET=YANDEX_CLIENT_SECRET
     ```
 
-2. Запустить Dokcer Desktop. Запустить docker-compose.yml командой:
+3. Запустить Dokcer Desktop. Запустить docker-compose.yml командой:
 
     ```
     docker-compose up --build
