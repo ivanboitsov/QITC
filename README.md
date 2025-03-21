@@ -11,49 +11,58 @@
 
 # Как запустить проект
 
-1. Клонировать данный репозиторий в любое удобное вам место командой:
+1. Клонируйте данный репозиторий в любое удобное вам место командой:
 
-    ```
-    git clone https://github.com/ivanboitsov/QITC.git
-    ```
+```
+git clone https://github.com/ivanboitsov/QITC.git
+```
 
-2. Добавить в папку проекта файл .env с описаннымим ниже переменными или просто взять их из примера ниже:
+2. Добавьте в папку проекта файл .env с описаннымим ниже переменными или просто взять их из примера ниже:
 
-    ```env
-    POSTGRES_DB=qitc_db
-    POSTGRES_USER=postgres
-    POSTGRES_PASSWORD=1234
+```env
+POSTGRES_DB=qitc_db
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=1234
 
-    DB_HOST=db
-    DB_PORT=5432
-    DB_NAME=qitc_db
-    DB_USER=postgres
-    DB_PASS=1234
+DB_HOST=db
+DB_PORT=5432
+DB_NAME=qitc_db
+DB_USER=postgres
+DB_PASS=1234
 
-    MIN_PASSWORD_LENGTH=8
+MIN_PASSWORD_LENGTH=8
 
-    ACCESS_TOKEN_EXPIRE_MINUTES=30
-    REFRESH_TOKEN_EXPIRE_MINUTES=60*24*7
-    ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+REFRESH_TOKEN_EXPIRE_MINUTES=60*24*7
+ALGORITHM=HS256
 
-    SESSION_SECRET_KEY=3e4f5g6h7i8j9k0l1m2n3o4p5q6r7s8t9u0v6q2x3y7a
+SESSION_SECRET_KEY=3e4f5g6h7i8j9k0l1m2n3o4p5q6r7s8t9u0v6q2x3y7a
 
-    JWT_SECRET_KEY=abc123def456ghi789jkl012mno345pqr678stu901vwx234t
-    JWT_REFRESH_SECRET_KEY=zyx987wvu654tsr321qpo098nml765kji432hgf109edc
+JWT_SECRET_KEY=abc123def456ghi789jkl012mno345pqr678stu901vwx234t
+JWT_REFRESH_SECRET_KEY=zyx987wvu654tsr321qpo098nml765kji432hgf109edc
 
-    # Нужно вписать свои данные
-    VK_CLIENT_ID=VK_CLIENT_ID
-    VK_CLIENT_SECRET=VK_CLIENT_SECRET
+# Нужно вписать свои данные
+VK_CLIENT_ID=VK_CLIENT_ID
+VK_CLIENT_SECRET=VK_CLIENT_SECRET
 
-    YANDEX_CLIENT_ID=YANDEX_CLIENT_ID 
-    YANDEX_CLIENT_SECRET=YANDEX_CLIENT_SECRET
-    ```
+YANDEX_CLIENT_ID=YANDEX_CLIENT_ID 
+YANDEX_CLIENT_SECRET=YANDEX_CLIENT_SECRET
+```
 
-3. Запустить Dokcer Desktop. Запустить docker-compose.yml командой:
+3. Запустите Dokcer Desktop.
 
-    ```
-    docker-compose up --build
-    ```
+#### ВАЖНО! Если вы открываете проект в VS code, проверьте, что файл `resotre.sh`, который лежит по пути `backend\backups\restore.sh`  имеет формат строки `LF`, а не `CRLF`. Это важно, так как Docker может не видеть данного файла.
+![](reports/images/image.png)
+
+4. Запустите docker контейнеры данной командой:
+
+```
+docker-compose up --build
+```
+
+5. Всё готово! Можете протестировать перейдя по данным ссылкам:
+    * Сваггер бэка `http://localhost:8000/docs`
+    * Страница сайта`http://localhost:3000/`
 
 # Визуальный вид проекта
 
