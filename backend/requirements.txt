@@ -1,6 +1,6 @@
 asyncpg==0.30.0
 alembic==1.15.1
-Authlib==1.5.1
+Authlib==1.6.12
 email_validator==2.2.0
 fastapi==0.115.11
 jose==1.0.0
